@@ -6,7 +6,6 @@ public class Main {
         Starter test = new Starter();
         test.UseFile("/Users/zelengzhuang/heuristicProblemSolving/adb_project/src/test.in");
         test.run();
-        test.Report();
 
     }
 }

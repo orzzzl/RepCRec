@@ -9,6 +9,7 @@ public class Starter {
 
     private int ticks;
     private ArrayList<Operation> rec;
+    public TransactionManager tm;
 
     public void UseFile(String filePath) {
         FileInputStream instream = null;
@@ -43,7 +44,7 @@ public class Starter {
 
     public void ProcessLine(String line) {
         if (line == null) return;
-        for (String i : line.split(";")) rec.add(ParseOperation(i));
+        for (String i : line.split(";")) tm.processOperation(ParseOperation(i));
     }
 
     public void run() {
@@ -56,5 +57,6 @@ public class Starter {
     public Starter() {
         ticks = 0;
         rec = new ArrayList<Operation>();
+        tm = new TransactionManager();
     }
 }

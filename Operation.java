@@ -6,7 +6,7 @@ public class Operation {
     public int value;
     public int timeStamp;
     public String type;
-    public String transactionID;
+    public String name;
 
     public void SetTargetValue(Variable variable, int value) {
         this.target = variable;
@@ -19,19 +19,20 @@ public class Operation {
 
     public Operation(String type, String transactionID, int timeStamp) {
         this.type = type;
-        this.transactionID = transactionID;
+        this.name = transactionID;
         this.timeStamp = timeStamp;
         this.target = new Variable();
     }
 
     public void Report() {
-        System.out.printf("type: %s| timeStamp: %d| value: %d| targat: %d| transactionID: %s\n", type, timeStamp, value, target.index, transactionID);
+        System.out.printf("type: %s| timeStamp: %d| value: %d| targat: %d| transactionID: %s\n", type, timeStamp, value, target.index, name);
  //       System.out.printf("| timeStamp: %d| value: %d| \n", timeStamp, value);
     }
 
+
     public Operation() {
         this.type = "undefined";
-        this.transactionID = "undefined";
+        this.name = "undefined";
         this.target = new Variable();
         this.value = 0;
         this.timeStamp = 0;
