@@ -1,29 +1,15 @@
 # README #
 
-This README would normally document whatever steps are necessary to get your application up and running.
+This the final project for advanced database system.
+This main idea of this project is to simulate a distributed database, complete
+with multiversion concurrency control, deadlock avoidance, replication, and
+failure recovery.
 
-### What is this repository for? ###
+### How to run? ###
 
-* Quick summary
-* Version
-* [Learn Markdown](https://bitbucket.org/tutorials/markdowndemo)
+You can run this project by either reads from the standard input or from a file.
 
-### How do I get set up? ###
+To use a file as the input, just replace the line 
+*test.UseFile("/Users/zelengzhuang/heuristicProblemSolving/adb_project/src/test.in");* with your file path in Main.java
 
-* Summary of set up
-* Configuration
-* Dependencies
-* Database configuration
-* How to run tests
-* Deployment instructions
-
-### Contribution guidelines ###
-
-* Writing tests
-* Code review
-* Other guidelines
-
-### Who do I talk to? ###
-
-* Repo owner or admin
-* Other community or team contact
+To read from standard input, just comment this line.
