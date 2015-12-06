@@ -10,9 +10,9 @@ public class TransactionManager {
     public Site[] sites;
     public HashMap<String, Transaction> transactions;
     public boolean verbose;
-
+    //TransactionManager constructor
     public TransactionManager() {
-        verbose = true;
+        verbose = false;
         this.transactions = new HashMap<>();
         this.sites = new Site[11];
         for (int i = 1; i <= 10; i++) {
@@ -75,7 +75,7 @@ public class TransactionManager {
     }
 
     private void commit(Operation op) {
-        if (verbose) {
+        if (true) {
             System.out.println("time: " + op.timeStamp + " transaction " + op.name + " is commited...");
         }
         Transaction cur = transactions.get(op.name);
