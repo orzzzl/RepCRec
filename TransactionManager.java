@@ -127,7 +127,10 @@ public class TransactionManager {
                     selected = decideWhoAbort(selected, sites[i].writeLocks.get(op.target.index));
                 }
             }
-            if (needAbort && selected.equals(op.name)) removeTransaction(selected, true);
+            boolean siteAllFailed = true;
+            for (int i = 1; i <= 10; i++) siteAllFailed = siteAllFailed && (!sites[i].isGood);
+            
+            if (!siteAllFailed && needAbort && selected.equals(op.name)) removeTransaction(selected, true);
         } else {
             if (sites[siteNo].canRead(op.name, op.target.index)) {
                 sites[siteNo].putReadLock(op.name, op.target.index);
@@ -137,7 +140,7 @@ public class TransactionManager {
                     System.err.println("error in select a transaction to abbort");
                     return;
                 }
-                if (selected.equals(op.name)) removeTransaction(selected, true);
+                if (selected.equals(op.name) && sites[siteNo].isGood) removeTransaction(selected, true);
             }
         }
     }
@@ -166,7 +169,9 @@ public class TransactionManager {
                         selected = decideWhoAbort(selected, sites[i].writeLocks.get(op.target.index));
                 }
             }
-            if (needAbort && selected.equals(op.name)) removeTransaction(selected, true);
+            boolean siteAllFailed = true;
+            for (int i = 1; i <= 10; i++) siteAllFailed = siteAllFailed && (!sites[i].isGood);
+            if (!siteAllFailed && needAbort && selected.equals(op.name)) removeTransaction(selected, true);
         } else {
             if (sites[siteNo].canWrite(op.name, op.target.index)) {
                 sites[siteNo].putWriteLock(op.name, op.target.index);
@@ -178,7 +183,7 @@ public class TransactionManager {
                 }
                 if (sites[siteNo].writeLocks.containsKey(op.target.index))
                     selected = decideWhoAbort(selected, sites[siteNo].writeLocks.get(op.target.index));
-                if (selected.equals(op.name)) removeTransaction(selected, true);
+                if (selected.equals(op.name) && sites[siteNo].isGood) removeTransaction(selected, true);
             }
         }
     }
