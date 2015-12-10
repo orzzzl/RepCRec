@@ -9,14 +9,19 @@ import java.util.Map;
 public class TransactionManager {
     public Site[] sites;
     public HashMap<String, Transaction> transactions;
+    public HashMap<Integer, ArrayList<Operation> > failedSitesBuffer;
+    public ArrayList<Operation> allFailedBuffer;
     public boolean verbose;
     //TransactionManager constructor
     public TransactionManager() {
         verbose = false;
         this.transactions = new HashMap<>();
+        allFailedBuffer = new ArrayList<>();
+        this.failedSitesBuffer = new HashMap<>();
         this.sites = new Site[11];
         for (int i = 1; i <= 10; i++) {
             this.sites[i] = new Site(i);
+            failedSitesBuffer.put(i, new ArrayList<Operation>());
         }
     }
 //removes transaction due to abort, frees all its locks on all sites
@@ -105,32 +110,32 @@ public class TransactionManager {
         if (verbose) {
             System.out.println("time: " + op.timeStamp + " transaction " + op.name + " read " + op.target.name);
         }
-        transactions.get(op.name).siteInvoved.add(op.target.GetSite());
-        transactions.get(op.name).myops.add(op);
         int siteNo = op.target.GetSite();
         if (transactions.get(op.name).isRO) {
-            if (siteNo == -1) {
-                boolean flag = false;
-                for (int i = 1; i <= 10; i++) flag = (flag || sites[i].isGood);
-                if (flag == false) removeTransaction(op.name, true);
-            } else if (sites[op.target.GetSite()].isGood == false) removeTransaction(op.name, true);
             return;
         }
         boolean needAbort = true;
         String selected = op.name;
         if (siteNo == -1) {
-            for (int i = 1; i <= 10; i++) {
+            int i = 1;
+            for (; i <= 10; i++) {
                 if (sites[i].canRead(op.name, op.target.index)) {
                     sites[i].putReadLock(op.name, op.target.index);
                     needAbort = false;
+                    break;
                 } else {
                     selected = decideWhoAbort(selected, sites[i].writeLocks.get(op.target.index));
                 }
             }
             boolean siteAllFailed = true;
-            for (int i = 1; i <= 10; i++) siteAllFailed = siteAllFailed && (!sites[i].isGood);
+            for (int ii = 1; ii <= 10; ii++) siteAllFailed = siteAllFailed && (!sites[ii].isGood);
             
             if (!siteAllFailed && needAbort && selected.equals(op.name)) removeTransaction(selected, true);
+            if (siteAllFailed) {
+                allFailedBuffer.add(op);
+                return;
+            }
+            siteNo = i;
         } else {
             if (sites[siteNo].canRead(op.name, op.target.index)) {
                 sites[siteNo].putReadLock(op.name, op.target.index);
@@ -140,9 +145,15 @@ public class TransactionManager {
                     System.err.println("error in select a transaction to abbort");
                     return;
                 }
+                if (sites[siteNo].isGood == false) {
+                    failedSitesBuffer.get(siteNo).add(op);
+                    return;
+                }
                 if (selected.equals(op.name) && sites[siteNo].isGood) removeTransaction(selected, true);
             }
         }
+        transactions.get(op.name).myops.add(op);
+        transactions.get(op.name).siteInvoved.add(siteNo);
     }
 //handles write instruction, whether locks are free or all sites are down etc., aborts transaction if necessary
     private void writeHandler(Operation op) {
@@ -171,6 +182,10 @@ public class TransactionManager {
             }
             boolean siteAllFailed = true;
             for (int i = 1; i <= 10; i++) siteAllFailed = siteAllFailed && (!sites[i].isGood);
+            if (siteAllFailed) {
+                allFailedBuffer.add(op);
+                return;
+            }
             if (!siteAllFailed && needAbort && selected.equals(op.name)) removeTransaction(selected, true);
         } else {
             if (sites[siteNo].canWrite(op.name, op.target.index)) {
@@ -183,6 +198,10 @@ public class TransactionManager {
                 }
                 if (sites[siteNo].writeLocks.containsKey(op.target.index))
                     selected = decideWhoAbort(selected, sites[siteNo].writeLocks.get(op.target.index));
+                if (sites[siteNo].isGood == false) {
+                    failedSitesBuffer.get(siteNo).add(op);
+                    return;
+                }
                 if (selected.equals(op.name) && sites[siteNo].isGood) removeTransaction(selected, true);
             }
         }
@@ -247,6 +266,13 @@ public class TransactionManager {
         if (verbose) {
             System.out.println("time: " + op.timeStamp + " site " + op.name + " recovered!!");
         }
-        sites[Integer.parseInt(op.name)].recover();
+        int siteNo = Integer.parseInt(op.name);
+        sites[siteNo].recover();
+        if (allFailedBuffer != null && allFailedBuffer.size() > 0)
+            for (Operation ele: allFailedBuffer) processOperation(ele);
+        if (failedSitesBuffer.get(siteNo) != null && failedSitesBuffer.get(siteNo).size() > 0)
+            for (Operation ele: failedSitesBuffer.get(siteNo)) processOperation(ele);
+        allFailedBuffer.clear();
+        failedSitesBuffer.get(siteNo).clear();
     }
 }

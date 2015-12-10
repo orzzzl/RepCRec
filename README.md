@@ -10,7 +10,7 @@ failure recovery.
 You can run this project by either reads from the standard input or from a file.
 
 To use a file as the input, just replace the line 
-*test.UseFile("/Users/zelengzhuang/heuristicProblemSolving/adb_project/src/test.in");*
-with your file path in Main.java
+java Main [FilePath]
 
 To read from standard input, just comment this line.
+java Main
