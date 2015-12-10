@@ -31,6 +31,7 @@ public class TransactionManager {
             Iterator it = tmp.siteInvoved.iterator();
             while (it.hasNext()) {
                 int siteVal = (int)it.next();
+               // System.err.println(siteVal);
                 if (siteVal == -1) {
                     for (int i = 1; i <= 10; i++) {
                         if (isAbort)
@@ -112,6 +113,8 @@ public class TransactionManager {
         }
         int siteNo = op.target.GetSite();
         if (transactions.get(op.name).isRO) {
+            transactions.get(op.name).myops.add(op);
+            transactions.get(op.name).siteInvoved.add(siteNo);
             return;
         }
         boolean needAbort = true;
@@ -130,12 +133,17 @@ public class TransactionManager {
             boolean siteAllFailed = true;
             for (int ii = 1; ii <= 10; ii++) siteAllFailed = siteAllFailed && (!sites[ii].isGood);
             
-            if (!siteAllFailed && needAbort && selected.equals(op.name)) removeTransaction(selected, true);
+            if (!siteAllFailed && needAbort && selected.equals(op.name)) {
+                removeTransaction(selected, true);
+                return;
+            }
             if (siteAllFailed) {
                 allFailedBuffer.add(op);
                 return;
             }
-            siteNo = i;
+            if (i <= 10) siteNo = i;
+            // op.Report();
+            // System.err.println("***" + i);
         } else {
             if (sites[siteNo].canRead(op.name, op.target.index)) {
                 sites[siteNo].putReadLock(op.name, op.target.index);
@@ -149,7 +157,10 @@ public class TransactionManager {
                     failedSitesBuffer.get(siteNo).add(op);
                     return;
                 }
-                if (selected.equals(op.name) && sites[siteNo].isGood) removeTransaction(selected, true);
+                if (selected.equals(op.name) && sites[siteNo].isGood) {
+                    removeTransaction(selected, true);
+                    return;
+                }
             }
         }
         transactions.get(op.name).myops.add(op);
@@ -171,6 +182,7 @@ public class TransactionManager {
                     sites[i].putWriteLock(op.name, op.target.index);
                     needAbort = false;
                 } else {
+                    if (sites[i].isGood == false) continue;
                     if (sites[i].readLocks.containsKey(op.target.index)) {
                         for (String ele : sites[i].readLocks.get(op.target.index)) {
                             selected = decideWhoAbort(selected, ele);
@@ -178,6 +190,7 @@ public class TransactionManager {
                     }
                     if (sites[i].writeLocks.containsKey(op.target.index))
                         selected = decideWhoAbort(selected, sites[i].writeLocks.get(op.target.index));
+                    break;
                 }
             }
             boolean siteAllFailed = true;
