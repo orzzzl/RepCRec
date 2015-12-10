@@ -14,7 +14,7 @@ public class Site {
     public HashMap<Integer, String> writeLocks;
     public HashMap<Integer, ArrayList<String> > readLocks;
 
-
+//setting up site of a specific number
     public Site(int siteNo) {
         this.siteNo = siteNo;
         values = new HashMap<>();
@@ -28,7 +28,7 @@ public class Site {
         }
         isGood = true;
     }
-
+//checking if a variable is good and free to read
     public boolean canRead(String transactionId, int variable) {
         if (isGood == false) return false;
         if (writeLocks.containsKey(variable) && writeLocks.get(variable).compareTo(transactionId) != 0) {
@@ -37,12 +37,12 @@ public class Site {
             return true;
         }
     }
-
+//checking if the lock of a specific variable is free
     public boolean canWrite(String transactionId, int variable) {
         if (isGood == false) return false;
         if (readLocks.containsKey(variable) && readLocks.get(variable) != null &&
-                (readLocks.get(variable).size() > 1) ||
-                (readLocks.size() == 1 && !readLocks.get(variable).get(0).equals(transactionId))) {
+                ((readLocks.get(variable).size() > 1) ||
+                (readLocks.size() == 1 && !readLocks.get(variable).get(0).equals(transactionId)))) {
             return false;
         }
         if (writeLocks.containsKey(variable) && writeLocks.get(variable).compareTo(transactionId) != 0) {
@@ -50,7 +50,7 @@ public class Site {
         }
         return true;
     }
-
+//sets read lock of a variable
     public boolean putReadLock(String transactionId, int variable) {
         if (isGood == false) return false;
         if (canRead(transactionId, variable) == false) return false;
@@ -60,14 +60,14 @@ public class Site {
         else this.readLocks.get(variable).add(transactionId);
         return true;
     }
-
+//sets write lock of a variable
     public boolean putWriteLock(String transactionId, int variable) {
         if (isGood == false) return false;
         if (canWrite(transactionId, variable) == false) return false;
         this.writeLocks.put(variable, transactionId);
         return true;
     }
-
+//frees all read and write locks
     public void freeLocks(String transactionId) {
         if (isGood == false) return;
         for (int i = 1; i <= 20; i++) {
@@ -83,14 +83,14 @@ public class Site {
     public boolean isVariableHere(int variable) {
         return values.containsKey(variable);
     }
-
+//executes write instruction
     public boolean writeDatabase(int variable, int ct, int lt, int v) {
         if (isGood == false) return false;
         if (isVariableHere(variable) == false) return false;
         values.get(variable).add(new ValueUnit(ct, lt, v));
         return true;
     }
-
+//if the variable is not good then the minimum integer is returned
     public int readBeforeCommitTimeT(int variable, int t) {
         if (isGood == false) return Integer.MIN_VALUE;
         if (isVariableHere(variable) == false) return Integer.MIN_VALUE;
@@ -104,7 +104,7 @@ public class Site {
         }
         return ans;
     }
-
+    
     public int readBeforeLockTimeT(int variable, int t) {
         if (isGood == false) return Integer.MIN_VALUE;
         if (isVariableHere(variable) == false) return Integer.MIN_VALUE;
@@ -118,11 +118,11 @@ public class Site {
         }
         return ans;
     }
-
+    //fails a specific site object
     public void fail() {
         this.isGood = false;
     }
-
+    //recovers site object
     public void recover() {
         this.isGood = true;
     }

@@ -19,7 +19,7 @@ public class TransactionManager {
             this.sites[i] = new Site(i);
         }
     }
-
+//removes transaction due to abort, frees all its locks on all sites
     public void removeTransaction(String transactionID, Boolean isAbort) {
         if (transactions.containsKey(transactionID)) {
             Transaction tmp = transactions.get(transactionID);
@@ -41,7 +41,7 @@ public class TransactionManager {
             transactions.remove(transactionID);
         }
     }
-
+//calls appropriate method depending on the type of the instruction
     public void processOperation(Operation op) {
         if (op.type.equals("dump")) {
             dump(op);
@@ -66,14 +66,14 @@ public class TransactionManager {
             }
         }
     }
-
+//creates new Transaction and places it in transactions hashmap
     private void transanctionBorn(Operation op, boolean isRO) {
         if (verbose) {
             System.out.println("time: " + op.timeStamp + " transaction " + op.name + " is created..." + " Is it RO? " + isRO);
         }
         this.transactions.put(op.name, new Transaction(op.timeStamp, isRO));
     }
-
+//commits transaction, saves changed variables and calls removeTransaction to release all locks 
     private void commit(Operation op) {
         if (true) {
             System.out.println("time: " + op.timeStamp + " transaction " + op.name + " is commited...");
@@ -144,7 +144,7 @@ public class TransactionManager {
             }
         }
     }
-
+//handles write instruction, whether locks are free or all sites are down etc., aborts transaction if necessary
     private void writeHandler(Operation op) {
         if (verbose) {
             System.out.println("time: " + op.timeStamp + " transaction " + op.name + " write " + op.target.name + " with value " + op.value);
@@ -187,7 +187,7 @@ public class TransactionManager {
             }
         }
     }
-
+//compares creation time of transactions to decide who wil abort
     private String decideWhoAbort(String t1, String t2) {
         if (transactions.containsKey(t1) && transactions.containsKey(t2)) {
             if (transactions.get(t1).beginTime > transactions.get(t2).beginTime) {
@@ -199,7 +199,7 @@ public class TransactionManager {
             return "ERROR";
         }
     }
-
+//aborts all transactions involved in a failed site
     private void fail(Operation op) {
         if (verbose) {
             System.out.println("time: " + op.timeStamp + " site " + op.name + " failed!!");

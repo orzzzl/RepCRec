@@ -3,7 +3,7 @@
  */
 public class ValueUnit {
     public int commitTime, lockTime, value;
-    
+    //saves commit time, and time that lock was acquired
     public ValueUnit(int ct, int lt, int v) {
         this.commitTime = ct;
         this.lockTime = lt;

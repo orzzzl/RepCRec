@@ -10,6 +10,7 @@ public class Variable {
     private void ParseName() {
         String indexPart = "";
         int i = 0;
+        //gets variable index
         for (; i < name.length(); i++) {
             if (name.charAt(i) >= '0' && name.charAt(i) <= '9') indexPart = indexPart + name.charAt(i);
             if (name.charAt(i) == '.') break;
